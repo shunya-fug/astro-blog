@@ -4,7 +4,7 @@ import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
 import { client } from "@/commons/clients/MicroCMSClient";
-import type { Blog } from "@/types/Blog";
+import type { Blog } from "@/commons/types/Blog";
 
 const response = await client.getList<Blog>({
   endpoint: "blogs",
