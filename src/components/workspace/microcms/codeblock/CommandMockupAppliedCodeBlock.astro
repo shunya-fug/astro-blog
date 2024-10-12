@@ -1,0 +1,40 @@
+<command-mockup-applied-code-block-component>
+  <div data-filename="hello.js">
+    <pre
+      class="flex">
+      <code class="language-shell">echo "Hello"</code>
+    </pre>
+  </div>
+</command-mockup-applied-code-block-component>
+
+<script>
+  class CommandMockupAppliedCodeBlockComponent extends HTMLElement {
+    constructor() {
+      super();
+
+      this.querySelectorAll("code").forEach((code) => {
+        const pre = code.closest("pre");
+        if (!pre) {
+          return;
+        }
+        pre.classList.add("my-0");
+        if (code.classList.contains("language-shell")) {
+          pre.dataset.prefix = ">";
+        }
+        let div = pre.closest<HTMLDivElement>("div[data-filename]");
+        if (div) {
+          div.classList.add("mockup-code");
+        } else {
+          div = document.createElement("div");
+          div.classList.add("mockup-code");
+          div.append(pre.cloneNode(true));
+          pre.replaceWith(div);
+        }
+      });
+    }
+  }
+  customElements.define(
+    "command-mockup-applied-code-block-component",
+    CommandMockupAppliedCodeBlockComponent,
+  );
+</script>

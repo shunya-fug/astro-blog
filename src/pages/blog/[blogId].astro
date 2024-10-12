@@ -25,25 +25,33 @@ const blog = await client.getListDetail<Blog>({
 
   blogContent?.querySelectorAll("code").forEach((code) => {
     const pre = code.closest("pre");
-    if (pre) {
-      pre.dataset.prefix = ">";
-      pre.classList.add("my-0");
+    if (!pre) {
+      return;
     }
-    const div = pre?.closest<HTMLDivElement>("div[data-filename]");
+    pre.classList.add("my-0");
+    if (code.classList.contains("language-shell")) {
+      pre.dataset.prefix = ">";
+    }
+    let div = pre?.closest<HTMLDivElement>("div[data-filename]");
     if (div) {
       div.classList.add("mockup-code");
-      // コードをクリップボードにコピーする
-      if (!navigator.clipboard) {
+    } else {
+      div = document.createElement("div");
+      div.classList.add("mockup-code");
+      div.append(pre.cloneNode(true));
+      pre.replaceWith(div);
+    }
+
+    if (!navigator.clipboard) {
+      return;
+    }
+    div.classList.add("cursor-pointer");
+    div.addEventListener("click", async () => {
+      const copied = await navigator.clipboard.readText();
+      if (!code.textContent || copied === code.textContent) {
         return;
       }
-      div.classList.add("cursor-pointer");
-      div.addEventListener("click", async () => {
-        const copied = await navigator.clipboard.readText();
-        if (!code.textContent || copied === code.textContent) {
-          return;
-        }
-        navigator.clipboard.writeText(code.textContent);
-      });
-    }
+      navigator.clipboard.writeText(code.textContent);
+    });
   });
 </script>
