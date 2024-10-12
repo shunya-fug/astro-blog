@@ -1,9 +1,7 @@
 ---
 import { client } from "@/commons/clients/MicroCMSClient";
 import type { Blog } from "@/commons/types/Blog";
-import BaseHead from "@/components/BaseHead.astro";
-import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
+import Layout from "@/layouts/Layout.astro";
 
 const { blogId } = Astro.params;
 
@@ -13,19 +11,39 @@ const blog = await client.getListDetail<Blog>({
 });
 ---
 
-<!doctype html>
-<html>
-  <head>
-    <BaseHead title="Blog" description="Blog" />
-  </head>
-  <body>
-    <Header />
-    <main>
-      <article class="prose prose-sm lg:prose-xl">
-        <h1>{blog.title}</h1>
-        <div set:html={blog.content} />
-      </article>
-    </main>
-    <Footer />
-  </body>
-</html>
+<Layout title={blog.title} description="ブログ">
+  <main class="container prose mx-auto p-4">
+    <article>
+      <h1>{blog.title}</h1>
+      <div id="blog-content" set:html={blog.content} />
+    </article>
+  </main>
+</Layout>
+
+<script>
+  const blogContent = document.getElementById("blog-content");
+
+  blogContent?.querySelectorAll("code").forEach((code) => {
+    const pre = code.closest("pre");
+    if (pre) {
+      pre.dataset.prefix = ">";
+      pre.classList.add("my-0");
+    }
+    const div = pre?.closest<HTMLDivElement>("div[data-filename]");
+    if (div) {
+      div.classList.add("mockup-code");
+      // コードをクリップボードにコピーする
+      if (!navigator.clipboard) {
+        return;
+      }
+      div.classList.add("cursor-pointer");
+      div.addEventListener("click", async () => {
+        const copied = await navigator.clipboard.readText();
+        if (!code.textContent || copied === code.textContent) {
+          return;
+        }
+        navigator.clipboard.writeText(code.textContent);
+      });
+    }
+  });
+</script>
