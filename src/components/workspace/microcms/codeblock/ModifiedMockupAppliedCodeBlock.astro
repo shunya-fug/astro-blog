@@ -1,0 +1,36 @@
+<modified-mockup-applied-code-block-component>
+  <div data-filename="hello.js">
+    <pre class="flex">
+      <code>const hello = "Hello"</code>
+    </pre>
+  </div>
+</modified-mockup-applied-code-block-component>
+
+<script>
+  class ModifiedMockupAppliedCodeBlockComponent extends HTMLElement {
+    constructor() {
+      super();
+
+      this.querySelectorAll("code").forEach((code) => {
+        const pre = code.closest("pre");
+        if (!pre) {
+          return;
+        }
+        pre.classList.add("my-0");
+        let div = pre.closest<HTMLDivElement>("div[data-filename]");
+        if (div) {
+          div.classList.add("mockup-code");
+        } else {
+          div = document.createElement("div");
+          div.classList.add("mockup-code");
+          div.append(pre.cloneNode(true));
+          pre.replaceWith(div);
+        }
+      });
+    }
+  }
+  customElements.define(
+    "modified-mockup-applied-code-block-component",
+    ModifiedMockupAppliedCodeBlockComponent,
+  );
+</script>

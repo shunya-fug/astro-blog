@@ -1,0 +1,171 @@
+import Layout from "@/layouts/Layout.astro";
+import DefaultCodeBlock from "@/components/workspace/microcms/codeblock/DefaultCodeBlock.astro";
+import MockupAppliedCodeBlock from "@/components/workspace/microcms/codeblock/MockupAppliedCodeBlock.astro";
+import ModifiedMockupAppliedCodeBlock from "@/components/workspace/microcms/codeblock/ModifiedMockupAppliedCodeBlock.astro";
+import CommandMockupAppliedCodeBlock from "@/components/workspace/microcms/codeblock/CommandMockupAppliedCodeBlock.astro";
+import CopyMockupAppliedCodeBlock from "@/components/workspace/microcms/codeblock/CopyMockupAppliedCodeBlock.astro";
+
+<Layout
+  title="Workspace"
+  description="MicroCMSのコードブロックをカスタマイズする。"
+>
+  <main class="container prose mx-auto p-4">
+    # MicroCMSのコードブロックをカスタマイズする。
+
+    ## 目的
+
+    - コードブロックのスタイルを変更する
+      - `DaisyUI`の`mockup-code`を使用
+      - `shell`コマンドの場合はプレフィックスを追加する
+    - コードブロッククリック時にクリップボードにコピーする機能を追加する
+
+    ## コードブロックの形式
+
+    [公式ドキュメント](https://document.microcms.io/manual/rich-editor-usage#h5c7cf48e04)に記載の通り、
+
+    - 指定なし
+    ```html
+    <pre>
+      <code>const hello = "Hello"</code>
+    </pre>
+    ```
+
+    - 言語指定(javascript)
+    ```html
+    <pre>
+      <code class="language-javascript">const hello = "Hello"</code>
+    </pre>
+    ```
+
+    - ファイル名指定(hello.js)
+    ```html
+    <div data-filename="hello.js">
+      <pre>
+        <code>const hello = "Hello"</code>
+      </pre>
+    </div>
+    ```
+
+    のようにレスポンス内容が変化します。
+
+    ## コードブロックのスタイリング
+
+    何も修正を加えない場合のレスポンスと表示は以下の通りです。
+
+    ```html
+    <pre>
+      <code>const hello = "Hello"</code>
+    </pre>
+    ```
+
+    <DefaultCodeBlock />
+
+    `DaisyUI`の`mockup-code`を適用するため、以下のようにプログラムを追加します。
+
+    ```javascript
+    document.querySelectorAll("code").forEach((code) => {
+      const pre = code.closest("pre");
+      if (!pre) {
+        return;
+      }
+      // preタグをdivタグで囲み、クラスを追加
+      const div = document.createElement("div");
+      div.classList.add("mockup-code");
+      div.append(pre.cloneNode(true));
+      pre.replaceWith(div);
+    });
+    ```
+
+    上記の内容を適用すると以下のような表示となります。
+
+    <MockupAppliedCodeBlock />
+
+    しかし、まだ以下の問題があるため修正を行います。
+
+    - 余白が広い
+    - ファイル名指定時は元々`div`タグで囲まれているため、`div`タグを追加しないようにする
+
+    ```javascript
+    this.querySelectorAll("code").forEach((code) => {
+      const pre = code.closest("pre");
+      if (!pre) {
+        return;
+      }
+      // 不要な余白を削除
+      pre.classList.add("my-0");
+      let div = pre.closest<HTMLDivElement>("div[data-filename]");
+      if (div) {
+        // ファイル名を指定している場合は元々のdivタグにクラスを追加
+        div.classList.add("mockup-code");
+      } else {
+        // ファイル名を指定していない場合はクラスを追加したdivタグで囲む
+        div = document.createElement("div");
+        div.classList.add("mockup-code");
+        div.append(pre.cloneNode(true));
+        pre.replaceWith(div);
+      }
+    });
+    ```
+
+    修正後は以下のような表示となります。
+
+    <ModifiedMockupAppliedCodeBlock />
+
+    ### Shellコマンド
+
+    コマンドの場合は`>`をプレフィックスとして追加したいです。
+
+    以下のようにプログラムを修正します。
+
+    ```javascript
+    this.querySelectorAll("code").forEach((code) => {
+      const pre = code.closest("pre");
+      if (!pre) {
+        return;
+      }
+      pre.classList.add("my-0");
+      // shellコマンドの場合はプレフィックスを追加
+      if (code.classList.contains("language-shell")) {
+        pre.dataset.prefix = ">";
+      }
+      let div = pre.closest<HTMLDivElement>("div[data-filename]");
+      if (div) {
+        div.classList.add("mockup-code");
+      } else {
+        div = document.createElement("div");
+        div.classList.add("mockup-code");
+        div.append(pre.cloneNode(true));
+        pre.replaceWith(div);
+      }
+    });
+    ```
+
+    修正後、言語指定を`shell`にした場合は以下のような表示となります。
+
+    <CommandMockupAppliedCodeBlock />
+
+    ## コピー機能の追加
+
+    [`clipboard API`](https://developer.mozilla.org/ja/docs/Mozilla/Add-ons/WebExtensions/Interact_with_the_clipboard)を利用して以下のような処理を追加します。
+
+    ```javascript
+    if (!navigator.clipboard) {
+      // clipboard APIが利用できない場合は処理を終了
+      return;
+    }
+    div.classList.add("cursor-pointer");
+    div.addEventListener("click", async () => {
+      const copied = await navigator.clipboard.readText();
+      if (!code.textContent || copied === code.textContent) {
+        // 連続クリックの場合は同じ内容のコピーを防ぐ
+        return;
+      }
+      navigator.clipboard.writeText(code.textContent);
+    });
+    ```
+
+    上記処理追加後のコードブロックは以下のようになります。
+
+    <CopyMockupAppliedCodeBlock/>
+  </main>
+</Layout>
