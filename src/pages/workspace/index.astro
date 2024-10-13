@@ -1,17 +1,34 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+
+const workspacePageList = [
+  {
+    uri: "/microcms/codeblock",
+    title: "MicroCMSのコードブロックをカスタマイズする。",
+  },
+  {
+    uri: "/plantuml/convert",
+    title: "PlantUMLを画像に変換する",
+  },
+];
 ---
 
 <Layout title="Workspace" description="動作確認・検証等の備忘録です。">
-  <main class="container prose mx-auto p-4">
+  <main class="container prose mx-auto">
     <h1>Workspace</h1>
     <p>動作確認・検証等の備忘録です。</p>
-    <a href={`/workspace/microcms/codeblock`}>
-      <div class="card card-compact bg-neutral shadow-md">
-        <div class="card-body">
-          <h3 class="m-3">MicroCMSのコードブロックをカスタマイズする。</h3>
-        </div>
-      </div>
-    </a>
+    <div class="grid gap-4">
+      {
+        workspacePageList.map((page) => (
+          <a href={`/workspace${page.uri}`}>
+            <div class="card card-compact bg-neutral shadow-md">
+              <div class="card-body">
+                <h3 class="m-3">{page.title}</h3>
+              </div>
+            </div>
+          </a>
+        ))
+      }
+    </div>
   </main>
 </Layout>
