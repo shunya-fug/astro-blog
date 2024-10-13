@@ -1,0 +1,70 @@
+import Layout from "@/layouts/Layout.astro";
+import ScriptConvert from "@/components/workspace/plantuml/convert/ScriptConvert.svelte";
+
+<Layout title="Workspace" description="PlantUML">
+  <main class="container prose mx-auto p-4">
+    # PlantUMLを画像に変換する
+
+    ## 作成コンポーネント
+
+    <ScriptConvert client:load />
+
+    ## ライブラリ
+
+    - Svelte
+    - plantuml-encoder
+
+    ## プログラム
+
+    ```svelte
+    <script>
+      import { encode } from "plantuml-encoder";
+
+      const isBrowser = typeof localStorage !== "undefined";
+      const key = "workspace.plantuml.convert.value";
+
+      let value =
+        (isBrowser && localStorage.getItem(key)) ||
+        "@startuml\nA -> B : hello\n@enduml";
+      let src = `http://www.plantuml.com/plantuml/img/${encode(value)}`;
+
+      const convert = () => {
+        if (!value || !isBrowser) {
+          return;
+        }
+        localStorage.setItem(key, value);
+        src = `http://www.plantuml.com/plantuml/img/${encode(value)}`;
+        imageModal.showModal();
+      };
+    </script>
+
+    <!-- スクリプト入力フォーム -->
+    <label class="form-control">
+      <div class="label">
+        <span class="label-text">PlantUML Script</span>
+      </div>
+      <textarea class="textarea textarea-bordered min-h-40 font-mono" bind:value />
+    </label>
+    <!-- PlantUML変換ボタン -->
+    <div class="flex justify-end mt-4">
+      <button class="btn btn-sm md:btn-md" on:click={convert}>Convert</button>
+    </div>
+    <!-- 画像表示モーダル -->
+    <dialog id="imageModal" class="modal">
+      <div class="modal-box flex flex-col justify-center">
+        <h3 class="text-lg font-bold">PlantUML Converted Image</h3>
+        <img {src} class="m-0" alt="PlantUML" />
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button>Close</button>
+      </form>
+    </dialog>
+
+    <style>
+      textarea {
+        field-sizing: content;
+      }
+    </style>
+    ```
+  </main>
+</Layout>
