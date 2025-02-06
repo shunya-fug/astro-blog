@@ -1,0 +1,26 @@
+import Layout from "@/layouts/Layout.astro";
+import UnderLineMarker from "@/components/workspace/practice-design/UnderLineMarker.astro";
+
+<Layout title="Practice Design">
+  <main class="container prose mx-auto p-4">
+    ## アンダーライン表示
+
+    ### プログラム
+
+    ```html
+    <span class="relative [&>span]:hover:scale-x-100 [&>span]:hover:delay-0">
+      ホバー時に下線が引かれるテキスト
+      <span
+        class="absolute -bottom-1 left-0 h-1 w-full origin-left scale-x-0 bg-blue-400 transition-transform delay-200 duration-500 ease-in-out"
+      >
+        <!-- 下線 -->
+      </span>
+    </span>
+    ```
+
+    ### 動作確認
+
+    <UnderLineMarker />
+
+  </main>
+</Layout>
